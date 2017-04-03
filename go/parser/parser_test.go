@@ -52,6 +52,7 @@ var validPrograms = []interface{}{
 	`package p; func f() { switch ; {} };`,
 	`package p; func f() (int,) {}`,
 	`package p; func _(x []int) { for range x {} }`,
+	`package p; type x struct{}; var m = map[x]x{{}:{}}`,
 }
 
 func TestParseValidPrograms(t *testing.T) {
