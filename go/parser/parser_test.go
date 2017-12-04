@@ -46,12 +46,14 @@ var validPrograms = []interface{}{
 	`package p; type T []int; var a []bool; func f() { if a[T{42}[0]] {} };`,
 	`package p; type T []int; func g(int) bool { return true }; func f() { if g(T{42}[0]) {} };`,
 	`package p; type T []int; func f() { for _ = range []int{T{42}[0]} {} };`,
+	`package p; type T = []int; func f() int { return T{42}[0] };`,
 	`package p; var a = T{{1, 2}, {3, 4}}`,
 	`package p; func f() { select { case <- c: case c <- d: case c <- <- d: case <-c <- d: } };`,
 	`package p; func f() { if ; true {} };`,
 	`package p; func f() { switch ; {} };`,
 	`package p; func f() (int,) {}`,
 	`package p; func _(x []int) { for range x {} }`,
+	`package p; type x struct{}; var m = map[x]x{{}:{}}`,
 }
 
 func TestParseValidPrograms(t *testing.T) {

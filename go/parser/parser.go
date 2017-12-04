@@ -1157,7 +1157,7 @@ func (p *parser) parseCallOrConversion(fun ast.Expr) *ast.CallExpr {
 	return &ast.CallExpr{fun, lparen, list, ellipsis, rparen}
 }
 
-func (p *parser) parseElement(keyOk bool) ast.Expr {
+func (p *parser) parseValue(keyOk bool) ast.Expr {
 	if p.trace {
 		defer un(trace(p, "Element"))
 	}
@@ -1170,7 +1170,21 @@ func (p *parser) parseElement(keyOk bool) ast.Expr {
 	if keyOk && p.tok == token.COLON {
 		colon := p.pos
 		p.next()
-		x = &ast.KeyValueExpr{x, colon, p.parseElement(false)}
+		x = &ast.KeyValueExpr{x, colon, p.parseValue(false)}
+	}
+	return x
+}
+
+func (p *parser) parseElement() ast.Expr {
+	if p.trace {
+		defer un(trace(p, "Element"))
+	}
+
+	x := p.parseValue(true)
+	if p.tok == token.COLON {
+		colon := p.pos
+		p.next()
+		x = &ast.KeyValueExpr{x, colon, p.parseValue(false)}
 	}
 	return x
 }
@@ -1181,7 +1195,7 @@ func (p *parser) parseElementList() (list []ast.Expr) {
 	}
 
 	for p.tok != token.RBRACE && p.tok != token.EOF {
-		list = append(list, p.parseElement(true))
+		list = append(list, p.parseElement())
 		if !p.atComma("composite literal") {
 			break
 		}
@@ -2028,6 +2042,9 @@ func parseTypeSpec(p *parser, doc *ast.CommentGroup, decl *ast.GenDecl, _ int) a
 	// containing block.
 	// (Global identifiers are resolved in a separate phase after parsing.)
 	spec := &ast.TypeSpec{doc, ident, nil, p.lineComment}
+	if p.tok == token.ASSIGN {
+		p.next()
+	}
 	p.declare(spec, p.topScope, ast.Typ, ident)
 	typ := p.parseType()
 	p.expectSemi() // call before accessing p.linecomment
